@@ -18,7 +18,9 @@
     "state",
     "store",
     "sync",
-    "prop drilling"
+    "prop drilling",
+    "prop-drilling",
+    "context"
   ],
   "files": [
     "build"

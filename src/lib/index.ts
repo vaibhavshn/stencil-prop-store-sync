@@ -3,10 +3,10 @@ import { getElement, type ComponentInterface } from '@stencil/core';
 
 type Callback = (value: any, oldValue?: any) => void;
 
-export function createStoreSync<S extends Record<string, any>>(initialState: S) {
-  const store = createStore<S>(initialState);
+export function createStoreSync<StoreType extends Record<string, any>>(initialState: StoreType) {
+  const store = createStore<StoreType>(initialState);
 
-  const storeCallbacks = new Map<keyof S, Set<Callback>>();
+  const storeCallbacks = new Map<keyof StoreType, Set<Callback>>();
 
   store.on('set', (key, newValue, oldValue) => {
     const callbacks = storeCallbacks.get(key);
@@ -15,13 +15,13 @@ export function createStoreSync<S extends Record<string, any>>(initialState: S) 
     }
   });
 
-  function addCallback(key: keyof S, callback: Callback) {
+  function addCallback(key: keyof StoreType, callback: Callback) {
     const callbacks = storeCallbacks.get(key) || new Set();
     callbacks.add(callback);
     storeCallbacks.set(key, callbacks);
   }
 
-  function deleteCallback(key: keyof S, callback: Callback) {
+  function deleteCallback(key: keyof StoreType, callback: Callback) {
     const callbacks = storeCallbacks.get(key);
     if (callbacks) {
       callbacks.delete(callback);
@@ -32,11 +32,10 @@ export function createStoreSync<S extends Record<string, any>>(initialState: S) 
   }
 
   function SyncWithStore() {
-    return function (proto: ComponentInterface, propName: keyof S extends string ? keyof S : never) {
-      let isUpdatingFromStore = false;
+    return function (proto: ComponentInterface, propName: keyof StoreType) {
       let onChangeCallback: any;
 
-      type ValueType = S[keyof S];
+      type ValueType = StoreType[keyof StoreType];
 
       const { connectedCallback, disconnectedCallback } = proto;
 
@@ -48,9 +47,7 @@ export function createStoreSync<S extends Record<string, any>>(initialState: S) 
           const storeValue = store.state[propName];
 
           if (storeValue) {
-            isUpdatingFromStore = true;
             host[propName as string] = storeValue;
-            isUpdatingFromStore = false;
           }
 
           onChangeCallback = (newValue: ValueType, oldValue?: ValueType) => {
@@ -61,10 +58,7 @@ export function createStoreSync<S extends Record<string, any>>(initialState: S) 
               onChangeCallback = undefined;
               return;
             }
-            isUpdatingFromStore = true;
             host[propName as string] = newValue;
-            console.log(propName, isUpdatingFromStore);
-            isUpdatingFromStore = false;
           };
 
           addCallback(propName, onChangeCallback);

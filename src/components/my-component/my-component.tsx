@@ -22,8 +22,6 @@ export class MyComponent {
   data: Data;
 
   render() {
-    console.log(this.data, this.user);
-
     return (
       <div>
         <p>name: {JSON.stringify(this.user)}</p>

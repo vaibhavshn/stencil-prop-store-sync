@@ -10,7 +10,6 @@ export function createStoreSync<S extends Record<string, any>>(initialState: S) 
 
   store.on('set', (key, newValue, oldValue) => {
     const callbacks = storeCallbacks.get(key);
-    console.log('running callbacks for', key);
     if (callbacks) {
       callbacks.forEach(callback => callback(newValue, oldValue));
     }
@@ -36,8 +35,6 @@ export function createStoreSync<S extends Record<string, any>>(initialState: S) 
     return function (proto: ComponentInterface, propName: keyof S extends string ? keyof S : never) {
       let isUpdatingFromStore = false;
       let onChangeCallback: any;
-
-      console.log('init syncstore for', propName, isUpdatingFromStore, onChangeCallback);
 
       type ValueType = S[keyof S];
 

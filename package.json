@@ -4,12 +4,12 @@
   "version": "0.0.1",
   "description": "A Stencil decorator for synchronizing prop and state changes with a store, so you don't have to worry about prop drilling.",
   "license": "MIT",
-  "module": "build/index.mjs",
-  "types": "build/index.d.mts",
+  "module": "build/index.js",
+  "types": "build/index.d.ts",
   "exports": {
     ".": {
-      "types": "./build/index.d.mts",
-      "default": "./build/index.mjs"
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
     }
   },
   "keywords": [

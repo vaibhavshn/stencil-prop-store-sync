@@ -1,5 +1,5 @@
 import { Component, Prop, h } from '@stencil/core';
-import { format } from '../../utils/utils';
+import { Data, store, SyncWithStore, User } from '../../util/store';
 
 @Component({
   tag: 'my-component',
@@ -8,25 +8,45 @@ import { format } from '../../utils/utils';
 })
 export class MyComponent {
   /**
-   * The first name
+   * Name
    */
-  @Prop() first: string;
+  @SyncWithStore()
+  @Prop({ mutable: true })
+  user: User;
 
   /**
-   * The middle name
+   * Message
    */
-  @Prop() middle: string;
-
-  /**
-   * The last name
-   */
-  @Prop() last: string;
-
-  private getText(): string {
-    return format(this.first, this.middle, this.last);
-  }
+  @SyncWithStore()
+  @Prop({ mutable: true })
+  data: Data;
 
   render() {
-    return <div>Hello, World! I'm {this.getText()}</div>;
+    console.log(this.data, this.user);
+
+    return (
+      <div>
+        <p>name: {JSON.stringify(this.user)}</p>
+        <p>message: {JSON.stringify(this.data)}</p>
+
+        <button
+          onClick={() => {
+            store.state.user = { name: '' + Math.random() };
+            store.state.data = { token: '' + Math.random() };
+          }}
+        >
+          Update from store
+        </button>
+
+        <button
+          onClick={() => {
+            this.user = { name: 'runtime-' + Math.random() };
+            this.data = { token: 'runtime-' + Math.random() };
+          }}
+        >
+          Update in runtime
+        </button>
+      </div>
+    );
   }
 }

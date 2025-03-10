@@ -1,7 +1,7 @@
 {
   "name": "stencil-prop-store-sync",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A Stencil decorator for synchronizing prop and state changes with a store, so you don't have to worry about prop drilling.",
   "license": "MIT",
   "module": "build/index.js",

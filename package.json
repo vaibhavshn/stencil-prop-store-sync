@@ -1,8 +1,8 @@
 {
   "name": "stencil-prop-store-sync",
   "type": "module",
-  "version": "0.0.3",
-  "description": "A Stencil decorator for synchronizing prop and state changes with a store, so you don't have to worry about prop drilling.",
+  "version": "0.0.4",
+  "description": "A Stencil decorator for synchronizing @Prop and @State changes with a store, so you don't have to worry about prop drilling.",
   "license": "MIT",
   "module": "build/index.js",
   "types": "build/index.d.ts",
@@ -32,7 +32,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "build-stencil": "stencil build",
     "start": "stencil build --dev --watch --serve"
   },
   "devDependencies": {

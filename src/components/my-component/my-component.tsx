@@ -1,5 +1,5 @@
 import { Component, Prop, h } from '@stencil/core';
-import { Data, store, SyncWithStore, User } from '../../util/store';
+import { type Data, store, SyncWithStore, type User } from '../../util/store';
 
 @Component({
   tag: 'my-component',
@@ -20,6 +20,14 @@ export class MyComponent {
   @SyncWithStore()
   @Prop({ mutable: true })
   data: Data;
+
+  connectedCallback() {
+    console.log('component connected');
+  }
+
+  disconnectedCallback() {
+    console.log('disconnected');
+  }
 
   render() {
     return (

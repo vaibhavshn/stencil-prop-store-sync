@@ -1,40 +1,55 @@
 import { createStore } from '@stencil/store';
 import { getElement, type ComponentInterface } from '@stencil/core';
 
-type Callback = (value: any, oldValue?: any) => void;
-
 /**
  * Creates a Stencil store instance as well as a typed `@SyncWithStore` decorator
  * that you can use to sync component properties with the store's state.
  * @param initialState The initial state of the store
  */
-export function createStoreSync<StoreType extends Record<string, any>>(initialState: StoreType) {
+export function createStoreSync<
+  StoreType extends {
+    [key: string]: any;
+  },
+>(initialState: StoreType) {
   const store = createStore<StoreType>(initialState);
 
-  const storeCallbacks = new Map<keyof StoreType, Set<Callback>>();
+  const elementsMap = new Map<string, any[]>();
 
-  // Stencil Store doesn't have a way to cleanup callbacks
-  // so handling callbacks on our own which can be cleaned up
-  store.on('set', (key, newValue, oldValue) => {
-    const callbacks = storeCallbacks.get(key);
-    if (callbacks) {
-      callbacks.forEach(callback => callback(newValue, oldValue));
-    }
+  store.use({
+    set: (propName, newValue, oldValue) => {
+      const elements = elementsMap.get(propName as string);
+      if (elements) {
+        elementsMap.set(
+          propName as string,
+          elements.filter(element => {
+            const currentValue = element[propName];
+            if (currentValue === oldValue) {
+              element[propName] = newValue;
+              return true;
+            } else {
+              return false;
+            }
+          }),
+        );
+      }
+    },
   });
 
-  function addCallback(key: keyof StoreType, callback: Callback) {
-    const callbacks = storeCallbacks.get(key) || new Set();
-    callbacks.add(callback);
-    storeCallbacks.set(key, callbacks);
+  function appendElement(propName: string, element: any) {
+    const elements = elementsMap.get(propName);
+    if (!elements) {
+      elementsMap.set(propName, [element]);
+    } else {
+      elements.push(element);
+    }
   }
 
-  function deleteCallback(key: keyof StoreType, callback: Callback) {
-    const callbacks = storeCallbacks.get(key);
-    if (callbacks) {
-      callbacks.delete(callback);
-      if (callbacks.size === 0) {
-        storeCallbacks.delete(key);
-      }
+  function removeElement(propName: string, element: any) {
+    const elements = elementsMap.get(propName) || [];
+    const index = elements.indexOf(element);
+    if (index !== -1) {
+      elements.splice(index, 1);
+      elementsMap.set(propName, elements);
     }
   }
 
@@ -45,10 +60,6 @@ export function createStoreSync<StoreType extends Record<string, any>>(initialSt
    */
   function SyncWithStore() {
     return function (proto: ComponentInterface, propName: keyof StoreType) {
-      let onChangeCallback: any;
-
-      type ValueType = StoreType[keyof StoreType];
-
       const { connectedCallback, disconnectedCallback } = proto;
 
       proto.connectedCallback = function () {
@@ -57,31 +68,15 @@ export function createStoreSync<StoreType extends Record<string, any>>(initialSt
 
         if (!value) {
           const storeValue = store.state[propName];
-
-          if (storeValue) {
-            host[propName as string] = storeValue;
-          }
-
-          onChangeCallback = (newValue: ValueType, oldValue?: ValueType) => {
-            const currentValue = host[propName as string];
-            if (currentValue !== oldValue) {
-              // remove callback since prop/state was changed manually
-              deleteCallback(propName, onChangeCallback);
-              onChangeCallback = undefined;
-              return;
-            }
-            host[propName as string] = newValue;
-          };
-
-          addCallback(propName, onChangeCallback);
+          host[propName as string] = storeValue;
+          appendElement(propName as string, host);
         }
 
         return connectedCallback?.call(this);
       };
 
       proto.disconnectedCallback = function () {
-        deleteCallback(propName, onChangeCallback);
-        onChangeCallback = undefined;
+        removeElement(propName as string, getElement(this));
         return disconnectedCallback?.call(this);
       };
     };

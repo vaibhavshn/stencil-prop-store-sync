@@ -12,7 +12,9 @@
     "noUnusedParameters": true,
     "jsx": "react",
     "jsxFactory": "h",
-    "jsxFragmentFactory": "h.Fragment"
+    "jsxFragmentFactory": "h.Fragment",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]
